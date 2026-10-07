@@ -1,0 +1,227 @@
+# Aster CI: build + test on Ubuntu and macOS in Release. Runs a loose
+# Release throughput floor check + a strategy-layer regression gate on
+# Linux, a clang-tidy gate on Linux Release, and uses ccache to keep
+# rebuilds under a minute. Sanitizer coverage (UBSan) is exercised in
+# CI on Ubuntu+Debug; macOS+Debug is intentionally NOT exercised
+# because Apple Clang UBSan runtime overhead remains too high for the
+# GHA runner. The offline CI mirror refresh lives in a separate
+# workflow file at .github/workflows/capture-ci.yml, triggered on a
+# 6-hour cron and via workflow_dispatch.
+#
+# A sanitizer compile/link drift check runs as a follow-up step after
+# every Build step (with `if: failure()`) so a mismatch between
+# target_compile_options's -fsanitize=… flag and target_link_options's
+# flag set fails the workflow with a precise message instead of a bare
+# `gmake: *** Error 2`. See scripts/check_sanitizer_drift.py for the
+# detector. The detector handles GNU ld, Clang LLD, and Apple ld (the
+# last as future-proofing if macOS-Debug is ever re-added to the
+# build matrix).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Main build + test matrix.
+  # --------------------------------------------------------------------------
+  build:
+    # Only on push + PR; schedule and workflow_dispatch are routed to the
+    # capture-ci job instead.
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    # CI runs Release across both OSes (production-proxy) and Debug on
+    # Ubuntu only so UBSan coverage is exercised in CI. macOS + Debug is
+    # dropped from the matrix because (a) Apple Clang UBSan runtime
+    # overhead remains higher than gcc on Linux, and (b) the bugs UBSan
+    # catches are compiler-independent (signed integer overflow, null,
+    # alignment, invalid shift) so one gating architecture suffices.
+    # CMakeLists.txt uses -O1 -g for Debug, which runs the per-test
+    # wallclock under 5 s with UBSan-only.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [Release]
+        include:
+          - os: ubuntu-latest
+            build_type: Debug
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ccache (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y ccache
+
+      - name: Install ccache (macOS)
+        if: matrix.os == 'macos-latest'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: brew install ccache
+
+      # Set the ccache directory via the step-level env: block so it's
+      # available to every subsequent `run:` action. Writing to $GITHUB_ENV
+      # from inside a step does NOT export back into the same step's shell
+      # (the prior `echo ... >> $GITHUB_ENV` pattern was the root cause of
+      # `mkdir: cannot create directory ''` in earlier runs).
+      - name: Configure ccache
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+        run: |
+          ccache --set-config=max_size=200M
+          mkdir -p "$CCACHE_DIR"
+
+      - name: Configure CMake (ccache)
+        run: >
+          cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc 2>/dev/null || sysctl -n hw.ncpu) 2>&1 | tee /tmp/build.log
+
+      # Sanitizer compile/link drift gate: runs only if the Build step
+      # above failed. Captures the link error pattern (e.g. __asan_init,
+      # __ubsan_handle_*) and reports which sanitizer family is
+      # compile-side-but-not-link-side so the fix is immediate. The tee
+      # in the Build step keeps /tmp/build.log around for this check.
+      - name: Sanitizer drift check
+        if: failure()
+        run: python3 scripts/check_sanitizer_drift.py /tmp/build.log
+
+      - name: Test
+        working-directory: build
+        # --timeout 120: per-test wallclock cap. 60s was flagged as borderline-
+        # aggressive for any future contributor adding a slower test. 120s
+        # gives ~2x headroom and still catches hangs.
+        # -E test_ci_snapshot: skip the offline-mirror snapshot gate from
+        # the CI matrix. That mirror only updates via the cron in
+        # capture-ci.yml, and the matrix itself can't authoritatively
+        # rewrite it (no gh auth in the job), so allowing this test
+        # inside the matrix creates a chicken-and-egg deadlock (`matrix
+        # red` => `mirror reflects red` => `test always fails`). Local
+        # devs run `ctest -L ci` on demand to verify the mirror. We use
+        # `-E <name>` (CMake 3.0+) rather than `--label-exclude` (3.20+)
+        # for compatibility with the older Apple CMake on macos-latest
+        # GHA runners.
+        run: ctest --output-on-failure --timeout 120
+
+      - name: ccache stats
+        if: matrix.os == 'ubuntu-latest' && matrix.build_type == 'Release'
+        run: ccache --show-stats --verbose | tail -20
+
+  # --------------------------------------------------------------------------
+  # Loose throughput floor check — only on Linux Release to avoid CI
+  # flakiness from shared macOS runners.
+  # --------------------------------------------------------------------------
+  perf-floor:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ccache
+        run: sudo apt-get update && sudo apt-get install -y ccache
+
+      - name: Configure ccache (perf-floor)
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+        run: |
+          ccache --set-config=max_size=200M
+          mkdir -p "$CCACHE_DIR"
+
+      - name: Configure (Release)
+        run: >
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc) 2>&1 | tee /tmp/build.log
+
+      - name: Sanitizer drift check
+        if: failure()
+        run: python3 scripts/check_sanitizer_drift.py /tmp/build.log
+
+      - name: Run throughput floor check
+        working-directory: build
+        run: |
+          output=$(./aster_sim --events 1000000)
+          echo "$output"
+          throughput=$(echo "$output" | awk '/Throughput:/{print $2}')
+          if [ -z "$throughput" ]; then
+            echo "Failed to parse throughput"
+            exit 1
+          fi
+          floor=10.0
+          cmp=$(echo "$throughput $floor" | awk '{if ($1 >= $2) print "ok"; else print "fail"}')
+          if [ "$cmp" != "ok" ]; then
+            echo "Throughput $throughput M events/s below floor $floor M events/s"
+            exit 1
+          fi
+          echo "Throughput floor check passed: $throughput M events/s >= $floor M events/s"
+
+      # ------------------------------------------------------------------
+      # Strategy-layer regression gate: replay a deterministic ITCH stream
+      # produced by scripts/generate_test_itch.py and assert the Analytics
+      # block matches tests/golden/analytics_ci.json within per-field
+      # tolerances. Stdlib-only Python; no extra deps to install.
+      # ------------------------------------------------------------------
+      - name: Strategy regression gate
+        run: |
+          set -e
+          python3 scripts/generate_test_itch.py --out /tmp/ci.itch --seconds 5
+          ./build/aster_replay --itch-file /tmp/ci.itch --speed batch > /tmp/ci.out 2>&1 || true
+          echo '--- replay output (last 20 lines) ---'
+          tail -20 /tmp/ci.out
+          python3 scripts/check_replay_golden.py tests/golden/analytics_ci.json /tmp/ci.out
+
+  # --------------------------------------------------------------------------
+  # clang-tidy static-analysis gate. Only Linux Release to keep runtimes
+  # reasonable; macOS clang-tidy is also fine but skipped to keep CI fast.
+  # --------------------------------------------------------------------------
+  lint:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install -y clang-tidy
+
+      - name: Configure (compile_commands generation)
+        run: >
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Run clang-tidy
+        # `bugprone-*,cppcoreguidelines-*,performance-*,readability-*` is the
+        # default checkset with `clang-tidy` minus modernize-* (we use C++20
+        # features clang-tidy -modernize can flag).
+        run: |
+          set -e
+          targets=(
+            "src/core/types.cpp"
+            "src/replay/parser.cpp"
+            "src/replay/replay_engine.cpp"
+            "src/strategy/analytics.cpp"
+            "src/strategy/mm_strategy.cpp"
+            "src/strategy/risk_manager.cpp"
+            "src/strategy/backtest.cpp"
+            "src/main.cpp"
+            "src/sim.cpp"
+          )
+          files=()
+          for t in "${targets[@]}"; do
+            [ -f "$t" ] && files+=("$t")
+          done
+          clang-tidy --quiet -p build "${files[@]}"
+

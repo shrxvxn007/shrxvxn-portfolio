@@ -46,6 +46,17 @@ body {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
+/* respect OS reduced-motion for CSS-driven loops */
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker-scroll,
+  .animate-pulse-dot {
+    animation: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* hide number spinners in terminal maybe */
 input[type="submit"] {
   background: none;

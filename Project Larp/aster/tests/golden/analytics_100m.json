@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "source": "scripts/run_100m_backtest.py --events 100000000 --pool-size 2_000_000 --speed batch",
+    "captured": "2026-07-15T23:49:03Z",
+    "regenerated_with": "python3 scripts/run_100m_backtest.py --events 100000000 --pool-size 2000000 --speed batch",
+    "events": 100000000,
+    "expected_fills": 50000000,
+    "wallclock_gen_s": 24.71,
+    "wallclock_replay_s": 103.914,
+    "tolerances": {
+      "_comment": "Matches the tolerance profile used by scripts/check_replay_golden.py for the 5-second analytics_ci.json golden. Counts are exact; currency fields are within 1e-4 absolute; ratios / Sharpes are within 1e-6 absolute. (Unlike the 5s golden, this file is informational \u2014 no live CI gate \u2014 so the goal is reproducible evidence, not byte-identical regeneration.)",
+      "currency_abs": 0.0001,
+      "ratio_abs": 1e-06,
+      "counts_exact": 0
+    }
+  },
+  "realized_pnl": 0.0,
+  "unrealized_pnl": 270600.0,
+  "total_fees": 5412.0,
+  "net_pnl": 265188.0,
+  "max_drawdown": 0.02,
+  "sharpe": 520.1912,
+  "sortino": 0.0,
+  "turnover": 27060000.0,
+  "avg_toxic_cost": 0.0,
+  "toxic_fills": 0,
+  "total_fills": 270600,
+  "toxic_pct": 0.0
+}

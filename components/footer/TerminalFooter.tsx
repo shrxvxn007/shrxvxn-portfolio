@@ -113,15 +113,27 @@ export default function TerminalFooter() {
         <div className="border-line mt-8 flex flex-col gap-3 border-t pt-6 font-mono text-[10px] tracking-[0.2em] text-dim uppercase md:flex-row md:items-center md:justify-between">
           <span>© 2026 ADRIAN VOSS — ALL SIGNALS MONITORED</span>
           <div className="flex items-center gap-6">
-            <a href="mailto:hello@voss.dev" className="transition-colors hover:text-accent">
+            <button
+              type="button"
+              onClick={() => (window.location.href = "mailto:hello@voss.dev")}
+              className="transition-colors hover:text-accent"
+            >
               EMAIL ↗
-            </a>
-            <a href="https://github.com" target="_blank" className="transition-colors hover:text-accent">
+            </button>
+            <button
+              type="button"
+              onClick={() => window.open("https://github.com", "_blank")}
+              className="transition-colors hover:text-accent"
+            >
               GITHUB ↗
-            </a>
-            <a href="/resume.pdf" target="_blank" className="transition-colors hover:text-accent">
+            </button>
+            <button
+              type="button"
+              onClick={() => window.open("/resume.pdf", "_blank")}
+              className="transition-colors hover:text-accent"
+            >
               RESUME ↗
-            </a>
+            </button>
           </div>
         </div>
       </div>

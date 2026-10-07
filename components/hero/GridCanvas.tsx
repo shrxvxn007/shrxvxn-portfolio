@@ -2,6 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 /**
  * Interactive canvas layer: a perspective-warped data grid (low horizon)
  * plus coarse "orbital" particle points (high horizon). Pointer moves the
@@ -19,6 +23,7 @@ export default function GridCanvas() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let reduced = prefersReducedMotion();
     let raf = 0;
     let w = 0;
     let h = 0;
@@ -56,7 +61,8 @@ export default function GridCanvas() {
 
     let t = 0;
     const draw = () => {
-      t += 0.008;
+      // static frame if the user prefers reduced motion (still renders layout)
+      if (!reduced) t += 0.008;
       const p = pointer.current;
       p.x += (p.tx - p.x) * 0.045;
       p.y += (p.ty - p.y) * 0.045;
@@ -140,6 +146,16 @@ export default function GridCanvas() {
 
       raf = requestAnimationFrame(draw);
     };
+
+    // reduced motion: render one static frame, no animation loop
+    if (reduced) {
+      draw();
+      return () => {
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("pointermove", onPointer);
+        window.removeEventListener("scroll", onScroll);
+      };
+    }
     raf = requestAnimationFrame(draw);
 
     return () => {

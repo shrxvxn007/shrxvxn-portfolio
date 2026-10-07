@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
+import MotionGate from "@/components/MotionGate";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,7 +27,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${inter.variable} ${mono.variable}`}>
-      <body className="font-sans bg-base text-muted">{children}</body>
+      {/* suppressHydrationWarning: browser extensions (e.g. Grammarly) mutate body attrs pre-hydration */}
+      <body
+        suppressHydrationWarning
+        className="font-sans bg-base text-muted"
+      >
+        <MotionGate>{children}</MotionGate>
+      </body>
     </html>
   );
 }

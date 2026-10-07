@@ -1,0 +1,41 @@
+[
+  {
+    "conclusion": "success",
+    "databaseId": 29495220257,
+    "event": "push",
+    "headBranch": "main",
+    "headSha": "d7e19ca3389e76269878869991452f97bb932b3e",
+    "name": "CI",
+    "startedAt": "2026-07-16T11:39:30Z",
+    "status": "completed",
+    "updatedAt": "2026-07-16T11:40:15Z",
+    "url": "https://github.com/shrxvxn007/aster/actions/runs/29495220257",
+    "workflowName": "CI"
+  },
+  {
+    "conclusion": "failure",
+    "databaseId": 29495219327,
+    "event": "push",
+    "headBranch": "main",
+    "headSha": "d7e19ca3389e76269878869991452f97bb932b3e",
+    "name": ".github/workflows/capture-ci.yml",
+    "startedAt": "2026-07-16T11:39:29Z",
+    "status": "completed",
+    "updatedAt": "2026-07-16T11:39:29Z",
+    "url": "https://github.com/shrxvxn007/aster/actions/runs/29495219327",
+    "workflowName": ".github/workflows/capture-ci.yml"
+  },
+  {
+    "conclusion": "success",
+    "databaseId": 29491375095,
+    "event": "push",
+    "headBranch": "main",
+    "headSha": "114b255a6dad987fc34fc352f968a18b57329d88",
+    "name": "CI",
+    "startedAt": "2026-07-16T10:35:36Z",
+    "status": "completed",
+    "updatedAt": "2026-07-16T10:36:25Z",
+    "url": "https://github.com/shrxvxn007/aster/actions/runs/29491375095",
+    "workflowName": "CI"
+  }
+]

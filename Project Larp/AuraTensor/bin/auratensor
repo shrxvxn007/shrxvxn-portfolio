@@ -1,0 +1,66 @@
+#!/bin/bash
+# AuraTensor: single-command entry point.
+#
+# Injects the required JVM flags (Vector API incubator on JDK 25 +
+# native access for FFM) so the user only types:
+#
+#   ./bin/auratensor --model foo.gguf --prompt "hi"
+#
+# Override behaviour via environment:
+#   AURATENSOR_JAR   Path to the shaded jar (default: ../target/auratensor.jar)
+#   JAVA_HOME        JDK install dir (default: java on $PATH)
+#   JAVA_OPTS        Extra JVM flags (inserted before the required flags)
+#
+# Requires Bash 3.2+ (macOS ships this; Linux distros ship 4+/5+).
+
+set -euo pipefail
+
+# Resolve the script's own directory, following symlinks. Uses a portable
+# `readlink` loop instead of GNU-only `readlink -f`, so this works on
+# macOS where BSD readlink lacks `-f` and on Linux distros alike.
+SRC="${BASH_SOURCE[0]}"
+while [ -h "$SRC" ]; do
+  DIR="$(cd -P "$(dirname "$SRC")" && pwd)"
+  SRC="$(readlink "$SRC")"
+  [[ "$SRC" != /* ]] && SRC="$DIR/$SRC"
+done
+DIR="$(cd -P "$(dirname "$SRC")" && pwd)"
+
+JAR="${AURATENSOR_JAR:-$DIR/../target/auratensor.jar}"
+
+if [ ! -f "$JAR" ] || [ ! -r "$JAR" ]; then
+  echo "[auratensor] ERROR: cannot read jar at: $JAR" >&2
+  echo "[auratensor] hint:  ./mvnw -DskipTests clean package" >&2
+  echo "[auratensor]        or set AURATENSOR_JAR=/path/to/auratensor.jar" >&2
+  exit 1
+fi
+
+# Java binary discovery: honour $JAVA_HOME first, fall back to $PATH.
+JAVA_CMD="java"
+if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+  JAVA_CMD="$JAVA_HOME/bin/java"
+elif ! command -v java >/dev/null 2>&1; then
+  echo "[auratensor] ERROR: no java executable found." >&2
+  echo "[auratensor] hint:  install JDK 21+ or set JAVA_HOME=/path/to/jdk" >&2
+  exit 127
+fi
+
+# Required JVM flags for AuraTensor on JDK 25:
+#   --add-modules jdk.incubator.vector   (JEP 489 Eighth Incubator; still required)
+#   --enable-native-access=ALL-UNNAMED   (FFM MemorySegment / FileChannel.map)
+# $JAVA_OPTS is intentionally placed BEFORE the required flags so users
+# can freely inject GC, memory, or `-XshowSettings` flags without clobbering
+# the SIMD / native-access knobs on which the engine hard-depends.
+# `$JAVA_OPTS` is intentionally expanded UNQUOTED so that whitespace
+# in the value (e.g. `-Xmx8G -XX:+UseG1GC`) splits into separate JVM
+# args. This is the standard shell idiom; an inner quoted literal such
+# as `-Dprop="x y"` is a known limit of bash env-var tokenisation
+# (applies to array-basd expansion equally) and should be quoted by the
+# user at the call site, not by the wrapper. Storing $JAVA_OPTS in an
+# array under `set -u` is incompatible with bash 3.2 + macOS (empty
+# array + nounset produces `arr[@]: unbound variable`), so we keep the
+# idiomatic unquoted single-string form.
+exec "$JAVA_CMD" ${JAVA_OPTS:-} \
+  --add-modules jdk.incubator.vector \
+  --enable-native-access=ALL-UNNAMED \
+  -jar "$JAR" "$@"

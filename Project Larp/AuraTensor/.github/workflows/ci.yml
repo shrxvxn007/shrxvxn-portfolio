@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Build & test (JDK ${{ matrix.java }})
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ '25' ]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-jdk${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-jdk${{ matrix.java }}-
+
+      - name: Show JDK version
+        run: java -version
+
+      # The pom.xml default <maven.compiler.release>25</maven.compiler.release>
+      # already matches the JDK 25 matrix; passing -Dmaven.compiler.release=25
+      # here is redundant but kept for future-flexibility if the matrix is
+      # ever extended (e.g. to add JDK 26 LTS). The JDK 21 matrix entry was
+      # dropped because the source uses the JDK 22+ finalized java.lang.foreign
+      # API shape (MemorySegment.get without ByteOrder parameter), which is
+      # illegal under JDK 21's Preview FFM API (JEP 442).
+      - name: Build & test (release=${{ matrix.java }})
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B -ntp clean test -Dmaven.compiler.release=${{ matrix.java }}
+
+  smoke-jmh:
+    runs-on: ubuntu-latest
+    name: Bench smoke (JDK ${{ matrix.java }})
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ '25' ]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-jdk${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-jdk${{ matrix.java }}-
+
+      # Same per-matrix release override as the test job.
+      - name: Build fat jar (release=${{ matrix.java }})
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B -ntp -DskipTests \
+                 -Dmaven.compiler.release=${{ matrix.java }} \
+                 clean package
+
+      # Smoke run: one short warmup + one short measurement iteration of the
+      # end-to-end forward pass (`TokenThroughputBenchmark.decodeLoop`). The
+      # goal is a fast (~30 s) gate that catches:
+      #   * JIT crashes (e.g. a vector lowering bug only present on certain
+      #     AVX/NEON lane widths) — surfacing as a JDK-level crash dump
+      #   * NaN / Inf outputs (kernel math regressions) — surfacing either as
+      #     Math arithmetic exceptions or visibly garbage ms/op numbers
+      #   * Kernel runtime errors (e.g. an off-by-one in a MemorySegment.slice)
+      # We deliberately do NOT add a numeric threshold assertion here — a
+      # threshold would be flaky across runner CPU variants. The cheapest
+      # reliable CI signal is "the JMH process exits 0 under `--add-modules
+      # jdk.incubator.vector --enable-native-access=ALL-UNNAMED`".
+      - name: JMH smoke (TokenThroughputBenchmark 1x1s on each context sweep)
+        run: |
+          java --enable-native-access=ALL-UNNAMED \
+               --add-modules jdk.incubator.vector \
+               -cp target/auratensor.jar \
+               io.auratensor.benchmarks.Bench '.*TokenThroughputBenchmark.*' \
+               -Dat.bench.warmupIters=1 -Dat.bench.warmupSec=1 \
+               -Dat.bench.measureIters=1 -Dat.bench.measureSec=1 \
+               -f 1

@@ -1,0 +1,91 @@
+name: Pages
+
+# Re-builds and publishes the evaluation notebook HTML to GitHub Pages on
+# every push to main (and on manual dispatch). The job is gated on
+# ``github.event.repository.has_pages`` so it is a no-op until the repo
+# owner enables Pages — see README.md → "Manual Pages setup".
+#
+# Until Pages is enabled, the committed ``docs/evaluation.html`` and
+# ``docs/cap_binding_diagnostics.html`` files are the fallback view.
+# Once Pages is enabled (Settings → Pages → Source = "GitHub Actions"),
+# this workflow takes over and publishes the same content to the live
+# site URL documented in README.md.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Don't cancel in-progress page builds — we want the most-recent successful
+# deploy to win, but never leave a half-built artefact in flight.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Skip the entire job until Pages is enabled. ``actions/configure-pages``
+    # would otherwise fail with HTTP 404 when no Pages site exists for the
+    # repository. Once the repo owner turns Pages on, the next push will
+    # trigger this job normally.
+    if: github.event.repository.has_pages
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build static HTML from notebooks
+        # Re-execute every notebook so the deployed HTML always reflects the
+        # current main branch (the committed docs/*.html are fallbacks for
+        # browsing via raw.githubusercontent.com when Pages is not enabled).
+        # Each output is a single-file HTML with all PNGs embedded as base64
+        # — no external assets, no CDN dependencies.
+        run: |
+          mkdir -p docs
+          python -m vesper.main --data-dir data
+          for nb in notebooks/evaluation.ipynb notebooks/cap_binding_diagnostics.ipynb; do
+            name=$(basename "$nb" .ipynb)
+            echo "--- building $name ---"
+            jupyter nbconvert --to notebook --execute \
+              "$nb" \
+              --output "${name}.ipynb" \
+              --ExecutePreprocessor.timeout=300
+            jupyter nbconvert --to html --output-dir docs --output "${name}.html" \
+              "$nb"
+            echo "  built $(wc -c < docs/${name}.html) bytes"
+          done
+          echo "All notebooks built."
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

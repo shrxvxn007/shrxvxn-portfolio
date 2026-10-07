@@ -1,9 +1,15 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useRef } from "react";
-import GridCanvas from "./GridCanvas";
 import SystemTicker from "./SystemTicker";
+
+// canvas layer loads after first paint — typography is server-rendered instantly
+const GridCanvas = dynamic(() => import("./GridCanvas"), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 bg-base" />,
+});
 
 /**
  * Cinematic hero: canvas layer behind, pinned typography that splits

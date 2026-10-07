@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 
 /**
  * Monospace system status ticker. Fixed to the hero's top bar.
- * Simulated low-latency parameters + live local clock + availability.
+ * Real build stats from the Project Larp repos + live local clock.
  */
 export default function SystemTicker() {
   const [time, setTime] = useState("--:--:--");
-  const [params, setParams] = useState({ lat: "0.42ms", pnl: "002.14", k: "4/4" });
 
   useEffect(() => {
     const tick = () => {
@@ -18,15 +17,6 @@ export default function SystemTicker() {
           d.getSeconds()
         ).padStart(2, "0")}`
       );
-      // low-noise synthetic telemetry
-      setParams((prev) => ({
-        lat: (0.38 + Math.random() * 0.2).toFixed(2) + "ms",
-        pnl:
-          prev.pnl === "002.14"
-            ? "002.09"
-            : (Number(prev.pnl) + (Math.random() - 0.5) * 0.03).toFixed(2).padStart(6, "0"),
-        k: Math.random() > 0.03 ? "4/4" : "3/4",
-      }));
     };
     const t = setInterval(tick, 1000);
     tick();
@@ -36,12 +26,12 @@ export default function SystemTicker() {
   const items = [
     "SYS.READY",
     `LOCAL ${time}`,
-    `E2E.LATENCY ${params.lat}`,
-    `FEED.LINKS ${params.k}`,
-    `SIM.PNL Δ ${params.pnl}`,
-    "AVAILABILITY 99.98%",
-    "BUILD v2.7.1",
-    "REGION US-EAST-1",
+    "ASTER 30.8M EV/S",
+    "ASTER P99 128NS",
+    "RETROVM 1.85NS/OP",
+    "AURATENSOR DEPS 0",
+    "ASTER 100M EVENT GOLDEN",
+    "REPLAY DETERMINISTIC",
   ];
 
   return (

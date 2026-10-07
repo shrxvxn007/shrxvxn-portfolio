@@ -41,7 +41,7 @@ export default function BentoStats() {
             [02]&nbsp;//&nbsp;CAPABILITY_SURFACE
           </div>
           <h2 className="font-sans mt-3 text-4xl font-semibold tracking-[-0.04em] text-fg md:text-5xl">
-            Signal density, <span className="text-muted">built deliberately.</span>
+            Signal density, <span className="text-muted">built from source.</span>
           </h2>
         </div>
         <div className="text-dim hidden font-mono text-[10px] tracking-widest md:block">
@@ -52,70 +52,71 @@ export default function BentoStats() {
       {/* Strict linear bento — unequal modules, hairline borders */}
       <div className="border-line border">
         <div className="grid grid-cols-1 md:grid-cols-12">
-          {/* equity module */}
+          {/* throughput module — aster */}
           <div className="border-line md:col-span-7 border-b p-6 md:border-r">
             <div className="flex items-center justify-between">
               <Marker tag="01" />
-              <span className="text-dim font-mono text-[10px] tracking-widest">EQUITY // 24M</span>
+              <span className="text-dim font-mono text-[10px] tracking-widest">ASTER // MATCHING_ENGINE</span>
             </div>
             <div className="mt-4 flex items-baseline gap-6">
               <div className="font-mono text-4xl tracking-[-0.03em] text-fg">
-                <CountUp to={2.71} decimals={2} />
+                <CountUp to={30.85} decimals={2} suffix="M" />
               </div>
-              <div className="text-accent font-mono text-[11px] tracking-widest">SHARPE ▲</div>
+              <div className="text-accent font-mono text-[11px] tracking-widest">EVENTS/SEC ▲</div>
             </div>
             <div className="mt-5">
               <EquityChart seed={13} height={130} />
             </div>
           </div>
 
-          {/* loss module */}
+          {/* dispatch module — retrovm */}
           <div className="border-line md:col-span-5 border-b p-6">
             <div className="flex items-center justify-between">
               <Marker tag="02" />
-              <span className="text-dim font-mono text-[10px] tracking-widest">TRAIN // DESCENT</span>
+              <span className="text-dim font-mono text-[10px] tracking-widest">RETROVM // DISPATCH</span>
             </div>
             <div className="mt-4 flex items-baseline gap-6">
               <div className="font-mono text-4xl tracking-[-0.03em] text-fg">
-                <CountUp to={184} suffix="M" />
+                <CountUp to={540} />
               </div>
-              <div className="text-dim font-mono text-[11px] tracking-widest">PARAMS</div>
+              <div className="text-dim font-mono text-[11px] tracking-widest">MIPS</div>
             </div>
             <div className="mt-5">
               <LossChart height={130} />
             </div>
           </div>
 
-          {/* latency module */}
+          {/* latency module — aster hot path */}
           <div className="border-line md:col-span-4 p-6 md:border-r">
             <Marker tag="03" />
             <div className="mt-4 font-mono text-4xl tracking-[-0.03em] text-fg">
-              <CountUp to={1.9} decimals={1} suffix="ms" />
+              <CountUp to={32} suffix="ns" />
             </div>
             <div className="text-dim mt-2 font-mono text-[10px] tracking-[0.25em]">
-              P99 // EXECUTION_FABRIC
+              P50 // ENGINE_CALLBACK
             </div>
             <pre className="border-line mt-5 border bg-base p-3 font-mono text-[10px] leading-relaxed text-muted">
-[SYS_INIT] io_uring registered
-[LOG]      ring depth 4096
-[LOG]      zero_copy=on
-[OK]       1.9ms steady state
+=== Synthetic Benchmark ===
+Events:    1000000
+Throughput: 13.88 M events/sec
+p50=32ns p90=64ns p99=128ns
+alloc_B=0  (pool preallocated)
             </pre>
           </div>
 
-          {/* precision module */}
+          {/* inference module — auratensor */}
           <div className="border-line md:col-span-4 p-6 md:border-r">
             <Marker tag="04" />
             <div className="mt-4 font-mono text-4xl tracking-[-0.03em] text-fg">
-              <CountUp to={99.98} decimals={2} suffix="%" />
+              <CountUp to={2.35} decimals={2} suffix=" t/s" />
             </div>
             <div className="text-dim mt-2 font-mono text-[10px] tracking-[0.25em]">
-              AVAILABILITY // 10M_roll
+              LLAMA-1B Q4_0 // NEON
             </div>
             <div className="border-line mt-5 grid grid-cols-3 border-t pt-3 font-mono text-[10px] tracking-wider text-muted">
-              <div>LOST: 0 pkts</div>
-              <div>REBAL: ×3</div>
-              <div>FAILOV: 42ms</div>
+              <div>DEPS: 0</div>
+              <div>TESTS: 49</div>
+              <div>CTX: 8K</div>
             </div>
           </div>
 
@@ -123,14 +124,14 @@ export default function BentoStats() {
           <div className="border-line md:col-span-4 p-6">
             <Marker tag="05" />
             <div className="text-dim mt-4 font-mono text-[10px] tracking-[0.25em]">
-              STACK // CONCENTRIC
+              STACK // BUILDS_IN_ANGer
             </div>
             <div className="border-line mt-4 space-y-0 border-t">
               {[
-                ["RESEARCH", "python · polars · statmodels"],
-                ["MODELING", "pytorch · triton · ray"],
-                ["RUNTIME", "rust · c++20 · io_uring"],
-                ["DELIVERY", "nextjs · golang · k8s"],
+                ["SYSTEMS", "c++20 · cmake · mmap"],
+                ["INFERENCE", "java21 · vector-api · gguf"],
+                ["RESEARCH", "python · cvxpy · pandas"],
+                ["WEB", "nextjs · react · tailwind"],
               ].map(([k, v]) => (
                 <div key={k} className="border-line flex items-baseline justify-between border-b py-2.5 last:border-b-0">
                   <span className="font-mono text-[10px] tracking-[0.2em] text-fg">{k}</span>

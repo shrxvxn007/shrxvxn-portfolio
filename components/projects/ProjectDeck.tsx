@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
-import { Sigma, BrainCircuit, Boxes } from "lucide-react";
+import { Sigma, BrainCircuit, Boxes, Cpu } from "lucide-react";
 
 type Project = {
   id: string;
@@ -20,79 +20,118 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
-    id: "volarb",
+    id: "aster",
     index: "01",
-    title: "Vol-Arb Statbook",
+    title: "Aster",
     track: "QUANT",
-    summary: "Intraday volatility reversion engine across index futures.",
+    summary:
+      "C++20 low-latency matching engine, ITCH replay harness and Avellaneda–Stoikov market-making backtester.",
     narrative: [
-      "Built the full research-to-execution loop: signal research in notebooks, promotion to a compiled strategy running colocated.",
-      "Designed a per-venue fill model with adverse-selection penalization; slippage estimates re-fit nightly in an automated walk-forward harness.",
-      "Risk layer enforces hard drawdown governors realized at the position-management thread — never downstream at the broker gateway.",
+      "Event-driven limit order book with price-time priority, multi-symbol books and a pre-allocated OrderPool — zero heap allocation on the hot path.",
+      "100M-event deterministic replay pipeline captured as a regenerable JSON golden; engine-only p50 is 32ns at 30.85M events/sec on Apple silicon, with a CI perf floor of 10M events/s.",
+      "Queue-position-aware quoting with Poisson fill probability, toxicity-driven spread widening, and a risk manager enforcing position limits, order throttling and a drawdown kill-switch.",
     ],
     metrics: [
-      { label: "SHARPE", value: "2.71" },
-      { label: "MAX DD", value: "-4.2%" },
-      { label: "FILL LAT", value: "94μs" },
-      { label: "TURNOVER", value: "$41M" },
+      { label: "THROUGHPUT", value: "30.8M/s" },
+      { label: "P50", value: "32ns" },
+      { label: "P99", value: "128ns" },
+      { label: "GOLDEN", value: "100M ev" },
     ],
-    stack: ["Rust", "Polars", "NumPy", "kdb+", "Fix-4.4"],
-    code: `let sig = zscore(spread, 20) * beta_adj(vix);
-if sig.abs() > T_ENTRY && inv_ok(px, qty) {
-  route_pegged(venue, px - 1tick, qty);
-}`,
+    stack: ["C++20", "CMake", "ITCH L2/L3", "HDR histogram", "clang-tidy"],
+    code: `// Avellaneda-Stoikov reservation price
+double sigma = p.gamma * p.sigma * p.sigma * time_remaining;
+double reservation = mid_price - (double)inventory * sigma;
+double half_spread = p.base_spread +
+  0.5 * (sigma + (1.0 / p.kappa) * log(1.0 + p.gamma / p.kappa));
+// fixed-point tick snap, compiler-independent
+bid_px = (bid_px / tick_px) * tick_px;`,
     icon: Sigma,
   },
   {
-    id: "seqrank",
+    id: "vesper",
     index: "02",
-    title: "Sequence Fill-Ranker",
-    track: "ML",
-    summary: "Transformer predicting short-horizon fill probability per quote.",
+    title: "Vesper",
+    track: "QUANT",
+    summary:
+      "Alternative-data statistical-arbitrage engine: weekly cross-sectional alpha from SEC filings and a supply-chain graph.",
     narrative: [
-      "Causal transformer over order-book delta streams with GQA heads to keep KV-cache footprint inside the tick budget.",
-      "Two-stage curriculum: masked pretraining over 1.2T raw tokens, then supervised fine-tune on labeled executed orders.",
-      "Serving path quantized to int8 with a CUDA graph capture; feature parity validated against the offline scorer bit-for-bit.",
+      "SEC EDGAR ingestion with a compliant User-Agent, then MD&A extraction (10-Q Item 2 / 10-K Item 7) via BeautifulSoup with regex-anchored heading detection.",
+      "Information-decay factor from TF-IDF cosine similarity between consecutive quarterly filings, plus 1-step directed shock propagation across the customer/supplier graph.",
+      "Institutional-grade allocator: PurgedGroupTimeSeriesSplit + L2 Ridge alpha model, sector factor neutralization, and a cvxpy convex optimizer with dollar-neutrality and ±3% name caps.",
     ],
     metrics: [
-      { label: "AUC", value: "0.934" },
-      { label: "P99 LAT", value: "11ms" },
-      { label: "PARAMS", value: "184M" },
-      { label: "TOKENS", value: "1.2T" },
+      { label: "SIGNALS", value: "EDGAR+graph" },
+      { label: "ALLOCATOR", value: "convex" },
+      { label: "NAME CAP", value: "±3%" },
+      { label: "TESTS", value: "unit+integ" },
     ],
-    stack: ["PyTorch", "Triton", "vLLM", "Ray", "Weights&Bias"],
-    code: `loss = masked_ce(logits, fills)
-if step % 1k == 0:
-    eval_regret(risk_model, shard=fills_val)
-    policy.snapshot(ema=0.99)`,
+    stack: ["Python", "cvxpy", "pandas", "BeautifulSoup", "scikit-learn"],
+    code: `# information decay between consecutive MD&A filings
+sim = cosine(tfidf(mda[q]), tfidf(mda[q - 1]))
+decay = clip(1.0 - sim, 0.0, 1.0)
+
+# cross-sectional allocation
+w = cp.Variable(n)
+cp.Problem(cp.Minimize(risk(w) + tc(w)),
+  [cp.sum(w) == 0, cp.abs(w) <= 0.03]).solve()`,
     icon: BrainCircuit,
   },
   {
-    id: "fabric",
+    id: "auratensor",
     index: "03",
-    title: "Execution Fabric",
-    track: "SWE",
-    summary: "Kernel-bypass messaging mesh for colocated strategy engines.",
+    title: "AuraTensor",
+    track: "ML",
+    summary:
+      "Zero-dependency, off-heap, SIMD-accelerated LLM inference engine in pure Java — runs GGUF Llama/Mistral without JNI or a GPU.",
     narrative: [
-      "Designed a zero-copy ring-buffer transport; strategies slot in as isolated processes with shared, lock-free state views.",
-      "Observability built in at the frame level: every wire message is accounted with a monotonic tag for loss/latency attribution.",
-      "Zero leak regressions over a 10-month window, enforced by fuzzing in CI and fault injection in staging.",
+      "Off-heap tensor engine on the Foreign Function & Memory API: weights are memory-mapped straight from GGUF v3 files, so the JVM never copies them.",
+      "SIMD kernel suite on the JDK Vector API — hardware-accelerated GEMM, RMSNorm, Softmax, RoPE and SiLU — with a fused Q4_0/Q8_0 dequantization inner loop that unpacks nibbles straight into vector registers.",
+      "OpenAI-compatible HTTP server on virtual threads with SSE streaming, an 8,192-token off-heap KV-cache that never triggers GC, and 49 JUnit tests green on the CI matrix.",
     ],
     metrics: [
-      { label: "P99 E2E", value: "1.9ms" },
-      { label: "UPTIME", value: "99.98%" },
-      { label: "SVC", value: "27" },
-      { label: "LEAKS", value: "0" },
+      { label: "DEPS", value: "0" },
+      { label: "TESTS", value: "49" },
+      { label: "CTX", value: "8,192" },
+      { label: "QUANT", value: "Q4_0/Q8_0" },
     ],
-    stack: ["Rust", "C++20", "io_uring", "DPDK", "NATS"],
-    code: `fn on_frame(m: &Frame) -> Cmd {
-  match m.tag() {
-    TAG_FILL => risk.on_fill(m)?,
-    TAG_ACK  => recon.corr(m.seq()),
-    _ => metrics.inc("unknown_tag"),
-  }
-}`,
+    stack: ["Java 21+", "Vector API", "FFM MemorySegment", "GGUF v3", "JMH"],
+    code: `// SIMD sgemv over raw MemorySegments — y = A·x
+for (int m = 0; m < M; m++) {
+  var acc = FloatVector.zero(SPEC);
+  for (int k = 0; k < K; k += SPEC.length())
+    acc = acc.add(a.getVector(m, k).mul(b.getVector(k)));
+  y[m] = acc.reduceLanes(ADD);
+}`, 
     icon: Boxes,
+  },
+  {
+    id: "retrovm",
+    index: "04",
+    title: "RetroVM",
+    track: "SWE",
+    summary:
+      "Deterministic record-and-replay virtual machine with a time-travel debugger, written from scratch in C++20.",
+    narrative: [
+      "Token-threaded interpreter using labels-as-values with a single indirect branch per opcode — measured 1.85ns per instruction (540 MIPS) on a 12-opcode ISA.",
+      "Record/replay via mmap-backed .trace logs with cycle-level divergence detection; non-deterministic IN/RAND events are re-injected byte-for-byte on replay.",
+      "Time-travel debugging over a 256-deep snapshot ring: mid-program 64-byte state checkpoints and sub-millisecond rewind (~3µs per back-step, bench-gated in CI).",
+    ],
+    metrics: [
+      { label: "DISPATCH", value: "540 MIPS" },
+      { label: "PER OP", value: "1.85ns" },
+      { label: "REWIND", value: "~3µs" },
+      { label: "CHECKPOINT", value: "64 B" },
+    ],
+    stack: ["C++20", "labels-as-values", "mmap", "POSIX", "ctest"],
+    code: `; demo.asm — assembled to a 32-bit fixed encoding
+LI    R0, 5
+LI    R1, 7
+ADD   R2, R0, R1      ; R2 = 12
+STORE R2, [0x100]
+LOAD  R3, [0x100]
+JNZ   R3, done
+HALT`,
+    icon: Cpu,
   },
 ];
 

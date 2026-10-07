@@ -50,7 +50,7 @@ export default function Hero() {
           <div className="w-full max-w-6xl px-6">
             <div className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase">
               <span className="animate-pulse-dot text-accent inline-block h-1.5 w-1.5 rounded-full bg-[#00FF66] align-middle" />
-              &nbsp;&nbsp;PORTFOLIO_NODE_01 — ONLINE
+              &nbsp;&nbsp;PORTFOLIO_NODE_01 — ONLINE · github.com/shrxvxn007
             </div>
 
             <div className="mt-6 flex items-baseline justify-between">
@@ -58,7 +58,7 @@ export default function Hero() {
                 style={{ x: xLeft }}
                 className="font-sans text-[clamp(3rem,9vw,8.5rem)] leading-[0.92] font-semibold tracking-[-0.045em] text-fg"
               >
-                ADR&Iacute;AN
+                SHRXVXN
               </motion.h1>
               <motion.span
                 style={{ x: xRight }}
@@ -77,17 +77,17 @@ export default function Hero() {
                   style={{ x: xRight }}
                   className="font-sans text-[clamp(3rem,9vw,8.5rem)] leading-[0.92] font-semibold tracking-[-0.045em] text-fg"
                 >
-                  VOSS
+                  MUDDULURU
                 </motion.h1>
                 <motion.p
                   style={{ x: xLeft }}
                   className="max-w-xs text-right font-mono text-[11px] leading-relaxed tracking-[0.1em] text-dim uppercase"
                 >
-                  Quantitative systems
+                  Market infrastructure
                   <br />
-                  Machine intelligence
+                  LLM inference engines
                   <br />
-                  Core infrastructure
+                  Alpha research
                 </motion.p>
               </div>
             </motion.div>
@@ -96,16 +96,16 @@ export default function Hero() {
               style={{ opacity }}
               className="mt-10 flex flex-wrap items-center gap-x-10 gap-y-3 font-mono text-[10px] tracking-[0.22em] text-dim uppercase"
             >
-              <span>[01] Sharpe-first engineering</span>
-              <span>[02] Latency as a feature</span>
-              <span>[03] Deterministic by design</span>
+              <span>[01] Allocation-free hot paths</span>
+              <span>[02] Nanoseconds are the product</span>
+              <span>[03] Bit-for-bit reproducible</span>
             </motion.div>
           </div>
         </motion.div>
 
         {/* corner coordinates */}
         <div className="pointer-events-none absolute bottom-6 left-6 font-mono text-[10px] tracking-[0.2em] text-dim">
-          40.7128&deg;N / 74.0060&deg;W
+          SHRXVXN007 / PORTFOLIO // QUANT&middot;ML&middot;SWE
         </div>
         <div className="pointer-events-none absolute right-6 bottom-6 font-mono text-[10px] tracking-[0.2em] text-dim">
           SCROLL &darr;

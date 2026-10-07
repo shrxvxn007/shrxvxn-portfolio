@@ -17,9 +17,9 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "A. VOSS — Quant × ML × SWE",
+  title: "SHRXVXN — Quant × ML × SWE",
   description:
-    "Multi-disciplinary engineering portfolio: quantitative finance, machine learning systems, and core backend infrastructure.",
+    "Engineering portfolio: low-latency C++ market infrastructure, JVM LLM inference, and Python alpha research. Source in /Project Larp.",
 };
 
 export default function RootLayout({

@@ -32,36 +32,38 @@ function QuantPanel() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3">
       <div className="border-line col-span-2 border-b p-6 md:border-r md:border-b-0">
-        <div className="font-mono text-[10px] tracking-[0.3em] text-accent">[QNT]&nbsp;EQUITY_CURVE</div>
+        <div className="font-mono text-[10px] tracking-[0.3em] text-accent">[QNT]&nbsp;REPLAY_BACKTEST</div>
         <div className="font-sans mt-2 text-3xl font-semibold tracking-[-0.03em] text-fg">
-          Backtest — Vol-Arb Statbook
+          Aster — MM Backtest over ITCH Replay
         </div>
         <p className="text-muted mt-2 max-w-lg text-sm leading-relaxed">
-          24mo intraday reversion strategy, 2,847 executions. Drawdown regime-tested
-          against 2022-style rate shock replays.
+          Avellaneda–Stoikov market-making over a deterministic ITCH replay
+          pipeline: queue-position-aware quotes, Poisson fill probability,
+          toxicity widening, and a 100M-event JSON golden for reproducibility.
         </p>
         <div className="mt-6">
           <EquityChart seed={7} height={150} />
         </div>
         <div className="border-line mt-4 grid grid-cols-4 gap-4 border-t pt-4">
-          <Metric label="Sharpe" value="2.71" />
-          <Metric label="Max DD" value="-4.2%" />
-          <Metric label="Hit Rate" value="58.3%" />
-          <Metric label="Turnover" value="$41M/d" />
+          <Metric label="Events" value="100M" />
+          <Metric label="Replay" value="104s" />
+          <Metric label="Callbacks" value="p50 128ns" />
+          <Metric label="Engine P50" value="32ns" />
         </div>
       </div>
       <div className="flex flex-col justify-between p-6">
         <div>
-          <div className="font-mono text-[10px] tracking-[0.3em] text-dim">[FEED]&nbsp;MARKET_DATA_STREAM</div>
-          <pre className="border-line mt-3 overflow-x-auto border p-3 font-mono text-[10px] leading-relaxed text-muted">{`ES    5124.50  ▲ +0.42%
-NQ    18220.75 ▲ +0.61%
-ZB    118.14   ▼ -0.08%
-CL    82.34    ▼ -0.22%
-EXO   SIG_9σ   [OK]`}</pre>
+          <div className="font-mono text-[10px] tracking-[0.3em] text-dim">[STRAT]&nbsp;QUOTE_PIPELINE</div>
+          <pre className="border-line mt-3 overflow-x-auto border p-3 font-mono text-[10px] leading-relaxed text-muted">{`ITCH S/A/E/C/D/L
+  → MatchingEngine<Callback>
+  → QueueTracker (vol ahead)
+  → MmStrategy (A-S quote)
+  → Analytics (PnL/Sharpe)
+RISK pos-limit · throttle · DD-kill`}</pre>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4">
-          <Metric label="Fill" value="94 μs" sub="edge→venue" />
-          <Metric label="Slippage" value="0.4 bps" sub="median" />
+          <Metric label="Perf floor" value="10M/s" sub="CI-gated" />
+          <Metric label="Hot path" value="0 alloc" sub="pooled orders" />
         </div>
       </div>
     </div>
@@ -72,37 +74,38 @@ function MLPanel() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3">
       <div className="border-line col-span-2 border-b p-6 md:border-r md:border-b-0">
-        <div className="font-mono text-[10px] tracking-[0.3em] text-accent">[ML]&nbsp;TRAINING_RUN</div>
+        <div className="font-mono text-[10px] tracking-[0.3em] text-accent">[ML]&nbsp;INFERENCE_ENGINE</div>
         <div className="font-sans mt-2 text-3xl font-semibold tracking-[-0.03em] text-fg">
-          Sequence Ranker — Loss Descent
+          AuraTensor — Llama on the JVM
         </div>
         <p className="text-muted mt-2 max-w-lg text-sm leading-relaxed">
-          8-layer causal transformer over order-book deltas. Two-stage curriculum:
-          masked pretrain → supervised fine-tune on labeled fills.
+          GGUF Llama 3 / Mistral inference in pure Java 21+: memory-mapped
+          weights via the FFM API, a Vector-API SIMD kernel suite, and a fused
+          Q4_0/Q8_0 dequant loop — zero third-party dependencies, no GPU.
         </p>
         <div className="mt-6">
           <LossChart height={150} />
         </div>
         <div className="border-line mt-4 grid grid-cols-4 gap-4 border-t pt-4">
-          <Metric label="Params" value="184M" />
-          <Metric label="Tokens" value="1.2T" />
-          <Metric label="p99 Lat" value="11 ms" />
-          <Metric label="AUC" value="0.934" />
+          <Metric label="Runtime deps" value="0" />
+          <Metric label="Tests" value="49" />
+          <Metric label="KV-cache ctx" value="8,192" />
+          <Metric label="1B Q4_0 t/s" value="2.35" />
         </div>
       </div>
       <div className="flex flex-col justify-between p-6">
         <div>
-          <div className="font-mono text-[10px] tracking-[0.3em] text-dim">[ARCH]&nbsp;LAYER_STACK</div>
-          <pre className="border-line mt-3 overflow-x-auto border p-3 font-mono text-[10px] leading-relaxed text-muted">{`TOKENS ─→ EMBED(64)
-  ├─ GQA×8  heads
-  ├─ RoPE   pos
-  ├─ MLP    4×   swiglu
-  └─ LN     pre
-RMS-55% prune`}</pre>
+          <div className="font-mono text-[10px] tracking-[0.3em] text-dim">[ARCH]&nbsp;KERNEL_STACK</div>
+          <pre className="border-line mt-3 overflow-x-auto border p-3 font-mono text-[10px] leading-relaxed text-muted">{`GGUF v3 ─→ mmap (FFM MemorySegment)
+  ├─ SGEMM   vector-api
+  ├─ RMSNorm · Softmax
+  ├─ RoPE    · SiLU
+  └─ Q4_0/Q8_0 fused dequant
+SAMPLER greedy · top-k · top-p`}</pre>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4">
-          <Metric label="GPU Hrs" value="6.4K" sub="A100" />
-          <Metric label="Regret" value="-3.1%" sub="vs baseline" />
+          <Metric label="Server" value="SSE" sub="virtual threads" />
+          <Metric label="Platforms" value="3" sub="linux·mac·win" />
         </div>
       </div>
     </div>
@@ -115,36 +118,36 @@ function SWEPanel() {
       <div className="border-line col-span-2 border-b p-6 md:border-r md:border-b-0">
         <div className="font-mono text-[10px] tracking-[0.3em] text-accent">[SWE]&nbsp;SYSTEMS</div>
         <div className="font-sans mt-2 text-3xl font-semibold tracking-[-0.03em] text-fg">
-          Low-latency Execution Fabric
+          RetroVM — Time-Travel Debugging
         </div>
         <p className="text-muted mt-2 max-w-lg text-sm leading-relaxed">
-          Kernel-bypass mesh in Rust + C++ slotting strategies into colocated
-          engines. Non-blocking ingest, ring-buffer state, zero-copy serialization.
+          Deterministic record-and-replay VM in C++20: token-threaded dispatch
+          via labels-as-values, mmap-backed .trace logs with cycle-level
+          divergence detection, and a 256-deep snapshot ring for rewind.
         </p>
         <div className="mt-6">
           <ContributionGraph weeks={40} />
         </div>
         <div className="border-line mt-4 grid grid-cols-4 gap-4 border-t pt-4">
-          <Metric label="Services" value="27" />
-          <Metric label="p99 E2E" value="1.9 ms" />
-          <Metric label="Uptime" value="99.98%" />
-          <Metric label="CRDT Repl" value="×3" />
+          <Metric label="Dispatch" value="540 MIPS" />
+          <Metric label="Per op" value="1.85 ns" />
+          <Metric label="Rewind" value="~3 µs" />
+          <Metric label="Checkpoint" value="64 B" />
         </div>
       </div>
       <div className="flex flex-col justify-between p-6">
         <div>
-          <div className="font-mono text-[10px] tracking-[0.3em] text-dim">[API]&nbsp;ENDPOINT_SCHEMA</div>
-          <pre className="border-line mt-3 overflow-x-auto border p-3 font-mono text-[10px] leading-relaxed text-muted">{`POST /v1/orders
-  → {venue, qty, px, tif}
-  ← 201 {ack: u64, id}
-  ×  ibcs_<=2.0ms
-
-GET /v1/fill/stream
-  ← ndjson, backpressure:drop`}</pre>
+          <div className="font-mono text-[10px] tracking-[0.3em] text-dim">[VM]&nbsp;REPL_SURFACE</div>
+          <pre className="border-line mt-3 overflow-x-auto border p-3 font-mono text-[10px] leading-relaxed text-muted">{`(retrovm) breakpoint 0x20
+(retrovm) continue
+*** Breakpoint 0x20 hit ***
+(retrovm) back 200        ← snapshot ring
+(retrovm) save ckpt.state
+  → 64-byte RVMSTATE magic`}</pre>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4">
-          <Metric label="Builds/wk" value="412" sub="green main" />
-          <Metric label="Leak RR" value="0" sub="10mo window" />
+          <Metric label="Phases" value="6/6" sub="roadmap done" />
+          <Metric label="Bench gate" value="sub-ms" sub="CI-enforced" />
         </div>
       </div>
     </div>

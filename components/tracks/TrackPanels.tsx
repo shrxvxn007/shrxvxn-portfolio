@@ -43,6 +43,10 @@ function QuantPanel() {
         </p>
         <div className="mt-6">
           <EquityChart seed={7} height={150} />
+          <div className="text-dim mt-2 font-mono text-[9px] tracking-widest">
+            ILLUSTRATIVE EQUITY CURVE — SHAPE OF THE A-S BACKTEST PNL, NOT THE
+            EXACT SERIES (SEE tests/golden/analytics_100m.json)
+          </div>
         </div>
         <div className="border-line mt-4 grid grid-cols-4 gap-4 border-t pt-4">
           <Metric label="Events" value="100M" />
@@ -85,6 +89,10 @@ function MLPanel() {
         </p>
         <div className="mt-6">
           <LossChart height={150} />
+          <div className="text-dim mt-2 font-mono text-[9px] tracking-widest">
+            ILLUSTRATIVE CURVE — WHAT LLM LOSS DECAY LOOKS LIKE OVER STEPS;
+            AURATENSOR RUNS PRE-TRAINED GGUF WEIGHTS, IT DOESN&apos;T TRAIN
+          </div>
         </div>
         <div className="border-line mt-4 grid grid-cols-4 gap-4 border-t pt-4">
           <Metric label="Runtime deps" value="0" />
@@ -127,6 +135,10 @@ function SWEPanel() {
         </p>
         <div className="mt-6">
           <ContributionGraph weeks={40} />
+          <div className="text-dim mt-2 font-mono text-[9px] tracking-widest">
+            SYNTHETIC GRID FOR TEXTURE, NOT REAL COMMIT DATA —
+            ACTUAL HISTORY AT github.com/shrxvxn007/RetroVM
+          </div>
         </div>
         <div className="border-line mt-4 grid grid-cols-4 gap-4 border-t pt-4">
           <Metric label="Dispatch" value="540 MIPS" />

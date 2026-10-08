@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 type Line = { kind: "in" | "out" | "err"; text: string };
 
 const GITHUB_URL = "https://github.com/shrxvxn007";
-const EMAIL = "mudduluru.sravankumarvarma07@gmail.com";
+const EMAIL = "s2773367@ed.ac.uk";
 
 const HELP = [
   "/help        list commands",
@@ -18,7 +18,7 @@ const HELP = [
 
 export default function TerminalFooter() {
   const [lines, setLines] = useState<Line[]>([
-    { kind: "out", text: "SHRXVXN_TERMINAL v3.0.0 — type /help for commands" },
+    { kind: "out", text: "SHRAVAN_TERMINAL v3.0.0 — type /help for commands" },
   ]);
   const [pending, setPending] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -96,7 +96,7 @@ export default function TerminalFooter() {
         >
           {lines.map((l, i) => (
             <div key={i} className="whitespace-pre-wrap">
-              {l.kind === "in" && <span className="text-accent">guest@shrxvxn:~$&nbsp;</span>}
+              {l.kind === "in" && <span className="text-accent">guest@shravan:~$&nbsp;</span>}
               {l.kind === "err" && (
                 <span className="font-mono text-[#FF5C00]">! </span>
               )}
@@ -106,7 +106,7 @@ export default function TerminalFooter() {
             </div>
           ))}
           <form onSubmit={onSubmit} className="mt-1 flex items-center">
-            <span className="text-accent shrink-0">guest@shrxvxn:~$&nbsp;</span>
+            <span className="text-accent shrink-0">guest@shravan:~$&nbsp;</span>
             <input
               ref={inputRef}
               className="w-full bg-transparent text-fg caret-[#00FF66] outline-none placeholder:text-dim"
@@ -118,7 +118,7 @@ export default function TerminalFooter() {
         </div>
 
         <div className="border-line mt-8 flex flex-col gap-3 border-t pt-6 font-mono text-[10px] tracking-[0.2em] text-dim uppercase md:flex-row md:items-center md:justify-between">
-          <span>© 2026 SHRXVXN — BUILT FROM THE PROJECT LARP ARCHIVE</span>
+          <span>© 2026 SHRAVAN MUDDULURU — BUILT FROM THE PROJECT LARP ARCHIVE</span>
           <div className="flex items-center gap-6">
             <button
               type="button"

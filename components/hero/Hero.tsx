@@ -58,7 +58,7 @@ export default function Hero() {
                 style={{ x: xLeft }}
                 className="font-sans text-[clamp(3rem,9vw,8.5rem)] leading-[0.92] font-semibold tracking-[-0.045em] text-fg"
               >
-                SHRXVXN
+                SHRAVAN
               </motion.h1>
               <motion.span
                 style={{ x: xRight }}
@@ -105,7 +105,7 @@ export default function Hero() {
 
         {/* corner coordinates */}
         <div className="pointer-events-none absolute bottom-6 left-6 font-mono text-[10px] tracking-[0.2em] text-dim">
-          SHRXVXN007 / PORTFOLIO // QUANT&middot;ML&middot;SWE
+          SHRAVAN007 / PORTFOLIO // QUANT&middot;ML&middot;SWE
         </div>
         <div className="pointer-events-none absolute right-6 bottom-6 font-mono text-[10px] tracking-[0.2em] text-dim">
           SCROLL &darr;

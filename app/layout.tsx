@@ -17,7 +17,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SHRXVXN — Quant × ML × SWE",
+  title: "Shravan Mudduluru — Quant × ML × SWE",
   description:
     "Engineering portfolio: low-latency C++ market infrastructure, JVM LLM inference, and Python alpha research. Source in /Project Larp.",
 };

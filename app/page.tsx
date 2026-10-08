@@ -28,7 +28,7 @@ export default function Home() {
             [04]&nbsp;//&nbsp;PROJECT_ARCHIVE
           </div>
           <h2 className="font-sans mt-3 text-4xl font-semibold tracking-[-0.04em] text-fg md:text-5xl">
-            Selected work, <span className="text-muted">scrubbed in sequence.</span>
+            Four builds, <span className="text-muted">all open source.</span>
           </h2>
         </div>
         <ProjectDeck />

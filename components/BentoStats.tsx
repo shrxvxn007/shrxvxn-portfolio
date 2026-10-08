@@ -41,7 +41,8 @@ export default function BentoStats() {
             [02]&nbsp;//&nbsp;CAPABILITY_SURFACE
           </div>
           <h2 className="font-sans mt-3 text-4xl font-semibold tracking-[-0.04em] text-fg md:text-5xl">
-            Signal density, <span className="text-muted">built from source.</span>
+            The numbers behind
+            <span className="text-muted"> the builds.</span>
           </h2>
         </div>
         <div className="text-dim hidden font-mono text-[10px] tracking-widest md:block">
@@ -66,6 +67,9 @@ export default function BentoStats() {
             </div>
             <div className="mt-5">
               <EquityChart seed={13} height={130} />
+              <div className="text-dim mt-2 font-mono text-[9px] tracking-widest">
+                EQUITY CURVE — ILLUSTRATIVE SHAPE, NOT LIVE DATA
+              </div>
             </div>
           </div>
 
@@ -83,6 +87,9 @@ export default function BentoStats() {
             </div>
             <div className="mt-5">
               <LossChart height={130} />
+              <div className="text-dim mt-2 font-mono text-[9px] tracking-widest">
+                SYNTHETIC VISUAL — REAL BENCH NUMBERS IN THE REPO
+              </div>
             </div>
           </div>
 
@@ -95,12 +102,12 @@ export default function BentoStats() {
             <div className="text-dim mt-2 font-mono text-[10px] tracking-[0.25em]">
               P50 // ENGINE_CALLBACK
             </div>
-            <pre className="border-line mt-5 border bg-base p-3 font-mono text-[10px] leading-relaxed text-muted">
-=== Synthetic Benchmark ===
-Events:    1000000
-Throughput: 13.88 M events/sec
-p50=32ns p90=64ns p99=128ns
-alloc_B=0  (pool preallocated)
+            <pre className="border-line mt-5 overflow-x-auto whitespace-pre border bg-base p-3 font-mono text-[10px] leading-relaxed text-muted">
+{`=== Aster bench, 1M events ===
+Events      1,000,000
+Throughput  13.88 M ev/s
+p50=32ns  p90=64ns  p99=128ns
+alloc=0  (pool preallocated)`}
             </pre>
           </div>
 
@@ -124,7 +131,7 @@ alloc_B=0  (pool preallocated)
           <div className="border-line md:col-span-4 p-6">
             <Marker tag="05" />
             <div className="text-dim mt-4 font-mono text-[10px] tracking-[0.25em]">
-              STACK // BUILDS_IN_ANGer
+              STACK //              BUILDS_IN_ANGER
             </div>
             <div className="border-line mt-4 space-y-0 border-t">
               {[

@@ -37,7 +37,7 @@ export default function ContributionGraph({ weeks = 40 }: { weeks?: number }) {
         ))}
       </div>
       <div className="mt-2 flex items-center justify-between font-mono text-[9px] tracking-widest text-dim">
-        <span>COMMIT DENSITY / 40W</span>
+        <span>DETERMINISTIC GRID / 40W</span>
         <div className="flex items-center gap-1">
           {[0.2, 0.45, 0.65, 0.85, 0.95].map((v) => (
             <div key={v} className="h-2 w-2" style={{ background: shade(v) }} />

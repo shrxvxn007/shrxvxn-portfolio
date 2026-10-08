@@ -1,5 +1,12 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Colors are CSS-variable driven so the light/dark toggle only has to swap
+ * a class on <html>. Channels are space-separated RGB triplets, wrapped in
+ * rgb(var(--c-x) / <alpha-value>) so Tailwind opacity modifiers still work.
+ */
+const ch = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
@@ -9,16 +16,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        base: "#0A0A0C",
-        panel: "#0F0F12",
-        line: "#18181B",
-        linebright: "#2A2A30",
-        fg: "#FFFFFF",
-        muted: "#8A8A93",
-        dim: "#4B4B52",
-        accent: "#00FF66",
-        "accent-dim": "#00FF6633",
-        orange: "#FF5C00",
+        base: ch("base"),
+        panel: ch("panel"),
+        line: ch("line"),
+        linebright: ch("linebright"),
+        fg: ch("fg"),
+        muted: ch("muted"),
+        dim: ch("dim"),
+        accent: ch("accent"),
+        "accent-dim": ch("accent") /* legacy name — same as accent */,
+        orange: ch("orange"),
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

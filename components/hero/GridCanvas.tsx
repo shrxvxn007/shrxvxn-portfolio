@@ -29,6 +29,19 @@ export default function GridCanvas() {
     let h = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
+    // theme-aware colors: canvas can't resolve CSS vars, so read the
+    // channel triplets from :root and refresh periodically (the theme
+    // toggle swaps them via the html.light class)
+    let ink = "255 255 255";
+    let accent = "0 255 102";
+    let colorTick = 0;
+    const refreshColors = () => {
+      const cs = getComputedStyle(document.documentElement);
+      ink = cs.getPropertyValue("--c-canvas-ink").trim() || ink;
+      accent = cs.getPropertyValue("--c-accent").trim() || accent;
+    };
+    refreshColors();
+
     const resize = () => {
       w = canvas.clientWidth;
       h = canvas.clientHeight;
@@ -63,6 +76,7 @@ export default function GridCanvas() {
     const draw = () => {
       // static frame if the user prefers reduced motion (still renders layout)
       if (!reduced) t += 0.008;
+      if (++colorTick % 60 === 0) refreshColors();
       const p = pointer.current;
       p.x += (p.tx - p.x) * 0.045;
       p.y += (p.ty - p.y) * 0.045;
@@ -80,7 +94,7 @@ export default function GridCanvas() {
       const RADIALS = 22;
       for (let i = 0; i < RADIALS; i++) {
         const spread = ((i / (RADIALS - 1)) - 0.5) * (w * 2.6);
-        ctx.strokeStyle = "rgba(255,255,255,0.045)";
+        ctx.strokeStyle = `rgba(${ink},0.045)`;
         ctx.beginPath();
         ctx.moveTo(vpx, vpy);
         ctx.lineTo(vpx + spread, h + 4);
@@ -92,7 +106,7 @@ export default function GridCanvas() {
         const y = vpy + Math.pow(k, 1.9) * (h - vpy) * 1.1;
         if (y > h + 2) continue;
         const alpha = 0.015 + k * 0.055;
-        ctx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+        ctx.strokeStyle = `rgba(${ink},${alpha.toFixed(3)})`;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(w, y);
@@ -102,9 +116,9 @@ export default function GridCanvas() {
           const speed = 110 + row * 40;
           const px = ((t * speed + row * 731) % (w + 220)) - 110;
           const g = ctx.createLinearGradient(px - 90, y, px + 90, y);
-          g.addColorStop(0, "rgba(0,255,102,0)");
-          g.addColorStop(0.5, "rgba(0,255,102,0.22)");
-          g.addColorStop(1, "rgba(0,255,102,0)");
+          g.addColorStop(0, `rgba(${accent},0)`);
+          g.addColorStop(0.5, `rgba(${accent},0.22)`);
+          g.addColorStop(1, `rgba(${accent},0)`);
           ctx.strokeStyle = g;
           ctx.beginPath();
           ctx.moveTo(px - 90, y);
@@ -114,7 +128,7 @@ export default function GridCanvas() {
       }
 
       // ---- upper "orbital" layer: scattered points + faint ring arcs ----
-      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.fillStyle = `rgba(${ink},0.5)`;
       for (const o of orbs) {
         const wob = Math.sin(t * o.s * 1.6 + o.seed) * 0.02;
         const rr = o.r + wob;
@@ -130,7 +144,7 @@ export default function GridCanvas() {
       // faint elliptical orbit arcs
       for (let ring = 0; ring < 3; ring++) {
         const rr = 0.22 + ring * 0.19;
-        ctx.strokeStyle = "rgba(255,255,255,0.05)";
+        ctx.strokeStyle = `rgba(${ink},0.05)`;
         ctx.beginPath();
         ctx.ellipse(
           w * 0.5,

@@ -11,7 +11,6 @@ type Props = {
   height?: number;
   accent?: string;
 };
-
 /** Monochrome SVG equity curve with deterministic pseudo-random walk. */
 function buildPath(seed: number, w: number, h: number, n = 90) {
   let s = seed;
@@ -35,7 +34,9 @@ export default function EquityChart({
   seed = 7,
   fill = true,
   height = 120,
-  accent = "#00FF66",
+  // theme-aware default; presentation attributes can't resolve var(), so
+  // colors go through the style prop
+  accent = "var(--c-accent)",
 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
@@ -50,7 +51,7 @@ export default function EquityChart({
         {fill && inView && (
           <motion.path
             d={area}
-            fill={accent}
+            style={{ fill: accent }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.07 }}
             transition={{ duration: 1.2, delay: 0.5 }}
@@ -59,7 +60,7 @@ export default function EquityChart({
         <motion.path
           d={line}
           fill="none"
-          stroke={accent}
+          style={{ stroke: accent }}
           strokeWidth={1.2}
           vectorEffect="non-scaling-stroke"
           initial={{ pathLength: 0, opacity: 0 }}
@@ -71,7 +72,7 @@ export default function EquityChart({
             cx={last[0]}
             cy={last[1]}
             r={2}
-            fill={accent}
+            style={{ fill: accent }}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 1.5 }}

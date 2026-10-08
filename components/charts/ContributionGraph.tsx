@@ -15,11 +15,11 @@ export default function ContributionGraph({ weeks = 40 }: { weeks?: number }) {
   }, [weeks]);
 
   const shade = (v: number) => {
-    if (v < 0.28) return "#141417";
-    if (v < 0.5) return "#0f3d22";
-    if (v < 0.72) return "#0d7a37";
-    if (v < 0.88) return "#00FF66";
-    return "#7dffb0";
+    if (v < 0.28) return "rgb(var(--c-cell-0))";
+    if (v < 0.5) return "rgb(var(--c-cell-1))";
+    if (v < 0.72) return "rgb(var(--c-cell-2))";
+    if (v < 0.88) return "rgb(var(--c-cell-3))";
+    return "rgb(var(--c-cell-4))";
   };
 
   return (

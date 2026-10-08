@@ -2,8 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme tokens: space-separated RGB channels, consumed as
+ * rgb(var(--c-x) / alpha) by Tailwind and rgba(var(--c-x) / a) below.
+ * Dark is the default; `html.light` (set by ThemeToggle / the no-FOUC
+ * script in layout.tsx) swaps to the paper palette.
+ */
 :root {
-  --bg: #0a0a0c;
+  --c-base: 10 10 12;
+  --c-panel: 15 15 18;
+  --c-line: 24 24 27;
+  --c-linebright: 42 42 48;
+  --c-fg: 255 255 255;
+  --c-muted: 138 138 147;
+  --c-dim: 75 75 82;
+  --c-accent: 0 255 102;
+  --c-orange: 255 92 0;
+  --c-cell-0: 20 20 23;
+  --c-cell-1: 15 61 34;
+  --c-cell-2: 13 122 55;
+  --c-cell-3: 0 255 102;
+  --c-cell-4: 125 255 176;
+  --c-canvas-ink: 255 255 255;
+}
+
+html.light {
+  --c-base: 246 246 243;
+  --c-panel: 255 255 255;
+  --c-line: 226 226 221;
+  --c-linebright: 198 198 191;
+  --c-fg: 17 17 20;
+  --c-muted: 82 82 90;
+  --c-dim: 155 155 163;
+  --c-accent: 0 138 62;
+  --c-orange: 200 68 0;
+  --c-cell-0: 235 235 231;
+  --c-cell-1: 191 229 205;
+  --c-cell-2: 127 211 160;
+  --c-cell-3: 0 138 62;
+  --c-cell-4: 0 96 43;
+  --c-canvas-ink: 17 17 20;
 }
 
 html {
@@ -11,8 +49,8 @@ html {
 }
 
 body {
-  background: var(--bg);
-  color: #8a8a93;
+  background: rgb(var(--c-base));
+  color: rgb(var(--c-muted));
   font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -20,8 +58,8 @@ body {
 }
 
 ::selection {
-  background: #00ff66;
-  color: #0a0a0c;
+  background: rgb(var(--c-accent));
+  color: rgb(var(--c-base));
 }
 
 /* thin groomed scrollbars */
@@ -30,20 +68,20 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0c;
+  background: rgb(var(--c-base));
 }
 ::-webkit-scrollbar-thumb {
-  background: #26262b;
-  border: 2px solid #0a0a0c;
+  background: rgb(var(--c-linebright));
+  border: 2px solid rgb(var(--c-base));
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3a41;
+  background: rgb(var(--c-dim));
 }
 
 /* fine hairline utility — 1px inner hairline for warm panels */
 .hairline {
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgb(var(--c-fg) / 0.05);
 }
 
 /* respect OS reduced-motion for CSS-driven loops */

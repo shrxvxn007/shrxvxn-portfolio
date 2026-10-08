@@ -98,9 +98,9 @@ export default function TerminalFooter() {
             <div key={i} className="whitespace-pre-wrap">
               {l.kind === "in" && <span className="text-accent">guest@shravan:~$&nbsp;</span>}
               {l.kind === "err" && (
-                <span className="font-mono text-[#FF5C00]">! </span>
+                <span className="font-mono text-orange">! </span>
               )}
-              <span className={l.kind === "err" ? "text-[#FF5C00]/80" : l.kind === "in" ? "text-fg" : ""}>
+              <span className={l.kind === "err" ? "text-orange/80" : l.kind === "in" ? "text-fg" : ""}>
                 {l.text}
               </span>
             </div>
@@ -109,7 +109,7 @@ export default function TerminalFooter() {
             <span className="text-accent shrink-0">guest@shravan:~$&nbsp;</span>
             <input
               ref={inputRef}
-              className="w-full bg-transparent text-fg caret-[#00FF66] outline-none placeholder:text-dim"
+              className="w-full bg-transparent text-fg caret-accent outline-none placeholder:text-dim"
               placeholder="type a command — /help"
               spellCheck={false}
               autoComplete="off"

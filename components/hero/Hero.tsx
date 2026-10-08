@@ -49,7 +49,7 @@ export default function Hero() {
         >
           <div className="w-full max-w-6xl px-6">
             <div className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase">
-              <span className="animate-pulse-dot text-accent inline-block h-1.5 w-1.5 rounded-full bg-[#00FF66] align-middle" />
+              <span className="animate-pulse-dot text-accent inline-block h-1.5 w-1.5 rounded-full bg-accent align-middle" />
               &nbsp;&nbsp;PORTFOLIO_NODE_01 — ONLINE · github.com/shrxvxn007
             </div>
 

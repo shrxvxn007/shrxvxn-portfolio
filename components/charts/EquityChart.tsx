@@ -34,9 +34,10 @@ export default function EquityChart({
   seed = 7,
   fill = true,
   height = 120,
-  // theme-aware default; presentation attributes can't resolve var(), so
-  // colors go through the style prop
-  accent = "var(--c-accent)",
+  // theme-aware default; tokens are channel triplets, so wrap in rgb().
+  // Colors go through the style prop because presentation attributes
+  // can't resolve var().
+  accent = "rgb(var(--c-accent))",
 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });

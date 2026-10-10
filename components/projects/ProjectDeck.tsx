@@ -204,7 +204,7 @@ function DeckCard({
                 className="pointer-events-none absolute inset-0 opacity-[0.12]"
                 style={{
                   backgroundImage:
-                    "linear-gradient(var(--c-line) 1px, transparent 1px), linear-gradient(90deg, var(--c-line) 1px, transparent 1px)",
+                    "linear-gradient(rgb(var(--c-line)) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--c-line)) 1px, transparent 1px)",
                   backgroundSize: "44px 44px",
                 }}
               />
@@ -243,7 +243,7 @@ function DeckCard({
                   <span
                     key={s}
                     className="font-mono text-[10px] tracking-[0.15em] text-muted uppercase"
-                    style={{ padding: "3px 8px", border: "1px solid var(--c-linebright)" }}
+                    style={{ padding: "3px 8px", border: "1px solid rgb(var(--c-linebright))" }}
                   >
                     {s}
                   </span>

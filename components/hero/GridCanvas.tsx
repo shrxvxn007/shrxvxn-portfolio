@@ -2,6 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
+/** CSS color token → canvas rgb() string; tolerates triplet / rgb() / hex. */
+function toCanvasColor(raw: string, fallback: string): string {
+  const v = raw.trim();
+  if (!v) return fallback;
+  if (/^\d/.test(v)) return `rgb(${v})`; // "0 255 102" → rgb()
+  return v; // rgb(...) or hex passes through
+}
+
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -29,16 +37,16 @@ export default function GridCanvas() {
     let h = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
-    // theme-aware colors: canvas can't resolve CSS vars, so read the
-    // channel triplets from :root and refresh periodically (the theme
-    // toggle swaps them via the html.light class)
-    let ink = "255 255 255";
-    let accent = "0 255 102";
+    // theme-aware colors: canvas can't resolve CSS vars, so read them from
+    // :root and refresh periodically (the toggle swaps them via html.light)
+    const cs0 = getComputedStyle(document.documentElement);
+    let ink = toCanvasColor(cs0.getPropertyValue("--c-canvas-ink"), "rgb(255 255 255)");
+    let accent = toCanvasColor(cs0.getPropertyValue("--c-accent"), "rgb(0 255 102)");
     let colorTick = 0;
     const refreshColors = () => {
       const cs = getComputedStyle(document.documentElement);
-      ink = cs.getPropertyValue("--c-canvas-ink").trim() || ink;
-      accent = cs.getPropertyValue("--c-accent").trim() || accent;
+      ink = toCanvasColor(cs.getPropertyValue("--c-canvas-ink"), ink);
+      accent = toCanvasColor(cs.getPropertyValue("--c-accent"), accent);
     };
     refreshColors();
 

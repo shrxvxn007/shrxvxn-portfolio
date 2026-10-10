@@ -30,12 +30,12 @@ export default function LossChart({ height = 110 }: { height?: number }) {
     <div ref={ref} className="relative w-full" style={{ height }}>
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full">
         {[25, 50, 75].map((y) => (
-          <line key={y} x1="0" x2="100" y1={y} y2={y} style={{ stroke: "var(--c-line)" }} strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
+          <line key={y} x1="0" x2="100" y1={y} y2={y} style={{ stroke: "rgb(var(--c-line))" }} strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
         ))}
         <motion.path
           d={train}
           fill="none"
-          style={{ stroke: "var(--c-accent)" }}
+          style={{ stroke: "rgb(var(--c-accent))" }}
           strokeWidth={1.2}
           vectorEffect="non-scaling-stroke"
           initial={{ pathLength: 0 }}
@@ -45,7 +45,7 @@ export default function LossChart({ height = 110 }: { height?: number }) {
         <motion.path
           d={val}
           fill="none"
-          style={{ stroke: "var(--c-muted)" }}
+          style={{ stroke: "rgb(var(--c-muted))" }}
           strokeWidth={1}
           strokeDasharray="3 2"
           vectorEffect="non-scaling-stroke"

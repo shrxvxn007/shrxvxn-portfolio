@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 /**
  * Fixed light/dark toggle. Swaps the `light` class on <html> (all colors
  * are CSS vars) and persists the choice to localStorage. The initial
- * render shows the dark icon; the useEffect syncs to the real theme
+ * render shows the dark-mode icon; the useEffect syncs to the real theme
  * after mount, so SSR and hydration always agree.
  */
 export default function ThemeToggle() {
@@ -27,14 +27,21 @@ export default function ThemeToggle() {
     }
   };
 
+  const label = light ? "Switch to dark theme" : "Switch to light theme";
+
   return (
     <button
       type="button"
       onClick={toggle}
-      aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-      className="border-line bg-base/80 text-dim hover:text-accent hover:border-linebright fixed right-3 top-3 z-50 flex h-8 w-8 items-center justify-center border backdrop-blur-sm transition-colors"
+      aria-label={label}
+      title={label}
+      className="border-linebright bg-panel/90 text-muted hover:border-accent hover:text-accent fixed right-4 top-4 z-50 flex h-11 w-11 items-center justify-center border shadow-lg transition-colors"
     >
-      {light ? <Moon size={13} strokeWidth={1.5} /> : <Sun size={13} strokeWidth={1.5} />}
+      {light ? (
+        <Moon size={18} strokeWidth={1.5} />
+      ) : (
+        <Sun size={18} strokeWidth={1.5} />
+      )}
     </button>
   );
 }
